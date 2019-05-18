@@ -123,7 +123,7 @@ This prevents attackers from attempting with root:
 1. While logged in as `grader`, install Apache with `$ sudo apt-get install apache2`
 2. In your browser go to http://54.255.238.98. You should see a Apache2 Ubuntu Default Page if Apache has been correctly configured
 
-#Install and configure the Python mod_wsgi file
+### Install and configure the Python mod_wsgi file
 1. Install the mod_wsgi package using `$ sudo apt-get install libapache2-mod-wsgi python-dev`
 2. Enable mod_wsgi using `$ sudo a2enmod wsgi`
 3. Restart Apache using `$ sudo service apache2 restart`
@@ -184,3 +184,95 @@ catalog  ALL=(ALL:ALL) ALL
 5. Save and exit the file
 6. Log in as user catalog using `$ sudo su - catalog`
 7. Exit from user catalog using `exit`
+
+### Install git and clone the Catalog project
+1. While logged in as grader, install git using `$ sudo apt-get install git`
+2. Create directory using `$ mkdir /var/www/catalog`
+3. Change to that directory and clone the catalog project from the previous GitHub project `$ sudo git clone https://github.com/shannonymous/fullstack-nanodegree-vm.git file`
+4. If your catalog file is like mine; nested in a few folders deep, you can move the `catalog` project folder into the `/var/www/catalog` folder. In the /catalog project folder, using `mv '/var/www/catalog/file/vagrant/catalog' to '/var/www/catalog/'`. You can also delete the extra folders from here: `rm -rf /var/www/catalog/file`
+5. Change the ownership of the catalog folder from the `/var/www` folder to grader using `$ sudo chown -R grader:grader catalog/`
+6. Change to the `/var/www/catalog/catalog` directory
+7. Rename the `application.py` file to `__init__.py` using `$ mv application.py __init__.py`
+8. In `__init__.py`, replace the line `app.run(host='0.0.0.0', port=8000)` to `app.run()`
+
+### Setup for deploying a Flask App on Ubuntu instance
+1. Install pip using `$ sudo apt-get install python-pip`
+2. Install the following packages:
+```
+$ sudo pip install httplib2
+$ sudo pip install requests
+$ sudo pip install --upgrade oauth2client
+$ sudo pip install sqlalchemy
+$ sudo pip install flask
+$ sudo apt-get install libpq-dev
+$ sudo pip install psycopg2
+```
+
+### Authenticate login through Google
+1. Go to [Google Cloud Platform](https://console.cloud.google.com)
+2. On the left menu, hover on `APIs & Services` and click on `Credentials`
+3. Create an OAuth Client ID (under the Credentials tab), and add http://54.255.238.98 and http://ec2-54-255-238-98.ap-southeast-1.compute.amazonaws.com as authorized JavaScript origins
+4. Add http://ec2-54-255-238-98.ap-southeast-1.compute.amazonaws.com/oauth2callback as authorized redirect URI
+5. Download the corresponding JSON file, open it and copy its contents
+6. `$ nano /var/www/catalog/catalog/client_secret.json` and replace the copied contents into this file
+7. In the `templates/login.html` file, replace the `client_id` in line 23
+
+### Setup the .conf file
+1. Create the configuration file for the catalog app using `$ sudo touch /etc/apache2/sites-available/catalog.conf`
+2. Add the following to the file:
+```
+<VirtualHost *:80>
+        ServerName 54.255.238.98
+        ServerAdmin admin@domain.com
+        WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+        <Directory /var/www/catalog/catalog/>
+                Order allow,deny
+                Allow from all
+        </Directory>
+        Alias /static /var/www/catalog/catalog/static
+        <Directory /var/www/catalog/catalog/static/>
+                Order allow,deny
+                Allow from all
+        </Directory>
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        LogLevel warn
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+ </VirtualHost>
+```
+3. To enable the virtual host, run `$ sudo a2ensite catalog`
+4. Restart Apache with `$ sudo service apache2 reload`
+
+### Setup the .wsgi file
+1. Create and enter the .wsgi file using `$ sudo nano /var/www/catalog/catalog.wsgi`
+2. Add the following to the file:
+```
+#!/usr/bin/python
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0, "/var/www/catalog/")
+
+from catalog import app as application
+application.secret_key = 'super_secret_key'
+```
+3. Restart Apache `$ sudo service apache2 reload`
+
+### Update the file paths (client_secrets and database)
+1. With `$ nano __init__.py`,  to change the client_secrets.json line to `/var/www/catalog/catalog/client_secrets.json` as follows:
+```
+CLIENT_ID = json.loads( open('/var/www/catalog/catalog/client_secrets.json', 'r').read())['web']['client_id']
+```
+2. Ensure to look through `__ini__.py` for every instance of this change and replace as stated.
+3. Update the database line in `__init__.py`, `database_setup.py`, and `sportsgen.py` with `engine = create_engine('postgresql://catalog:catalog@localhost/catalog')` so that the correct location is referenced for catalog database
+
+### Taking the app live
+1. Generate the database files by running the following commands:
+```
+$ python database_setup.py
+$ python sportsgen.py
+```
+2. Restart Apache using `$ sudo service apache2 reload`
+3. Disable the default Apache page. Run `$ sudo a2dissite 000-default.conf`
+3. Restart Apache using `$ sudo service apache2 reload`
+
+The application should be live at http://54.255.238.98. If there are internal errors returned, check the Apache error logs by running `$ sudo tail -100 /var/log/apache2/error.log` and resolve the traceback call error(s) it displays.
