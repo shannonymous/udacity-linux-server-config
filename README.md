@@ -301,7 +301,9 @@ After these operations, the folder structure should look like:
          |-- /venv3          # Virtual Environment
 ```
 
-## Much gratitude to
-* GitHub Repositories
-   * https://github.com/boisalai/udacity-linux-server-configuration/blob/master/README.md
-   * https://github.com/juvers/Linux-Configuration
+## Resources
+* Much gratitude to:
+  * https://github.com/boisalai/udacity-linux-server-configuration/blob/master/README.md
+  * https://github.com/juvers/Linux-Configuration
+* Links
+  * Official Ubuntu Documentation on [Automatic Updates](https://help.ubuntu.com/lts/serverguide/automatic-updates.html)
