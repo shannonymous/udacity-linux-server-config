@@ -9,23 +9,18 @@ To access the deployed website, visit http://54.255.238.98 or http://ec2-54-255-
 ## Amazon Lightsail Server Set Up
 
 
-If you already have an account with Amazon Lightsail, login. Otherwise, create an Amazon Lightsail account.
-
-After logging in, click 'Create an Instance';
-
-Select Linux/Unix platform
-
-For blueprint, select OS Only and Ubuntu
-
-Select an instance plan (for this project, the most afforable plan will do)
-
-Scroll down to name your instance and click 'Create'
+* If you already have an account with Amazon Lightsail, login. Otherwise, create an Amazon Lightsail account.
+* After logging in, click 'Create an Instance'
+* Select Linux/Unix platform
+* For blueprint, select OS Only and Ubuntu
+* Select an instance plan (for this project, the most afforable plan will do)
+* Scroll down to name your instance and click 'Create'
 
 The instance will take a few moments for setup. Once it is ready, do take note of the public IP of your instance.
 
-When on the "Connect tab", there is a link to your account page (https://lightsail.aws.amazon.com/ls/webapp/account/keys).
+* When on the "Connect tab", there is a link to your account page (https://lightsail.aws.amazon.com/ls/webapp/account/keys).
 
-Download your private key, which is a `.pem` file
+* Here, download your private key, which is a `.pem` file
 
 ## SSH into your server instance
 
@@ -109,13 +104,83 @@ Return to your original (first) terminal window logged into Amazon Lightsail as 
 * Change the ownership and permissions of the .ssh folder to the grader user: `$ chown -R grader.grader /home/grader/.ssh`.
 * Secure your authorized_keys `$ sudo chmod 700 /home/grader/.ssh` and `$ sudo chmod 644 /home/grader/.ssh/authorized_keys`.
 * Restart the SSH service `$ sudo service ssh restart`
-* You should now be able to login as grader user with port 2200 and the generated key pair with the following command: `$ ssh -i ~/.ssh/grader.rsa -p 2200 grader@54.255.238.98`.
+* You should now be able to login as grader user with port 2200 and the generated key pair with the following command: `$ ssh -i ~/.ssh/grader.rsa -p 2200 grader@54.255.238.98`. (note: it's no longer possible to SSH after this point through Lightsail's browser-based client)
 * You will be asked for grader's password. To disable it, `$ sudo nano /etc/ssh/sshd_config`. Find the line `PasswordAuthentication` and change text to no. After this, restart ssh again: `$ sudo service ssh restart`
-
-
-
-
 
 ### Configure the timezone to UTC
 1. Run `$ sudo dpkg-reconfigure tzdata`
 2. Select `None of the above` to change the timezone to UTC.
+
+### Disable SSH for root user
+This prevents attackers from attempting with root:
+* `$ sudo nano /etc/ssh/sshd_config`
+* Find the `PermitRootLogin` line and edit to `no`
+* Restart ssh `$ sudo service ssh restart`
+
+## Deploying the Catalog application
+
+### Install and configure Apache
+1. While logged in as `grader`, install Apache with `$ sudo apt-get install apache2`
+2. In your browser go to http://54.255.238.98. You should see a Apache2 Ubuntu Default Page if Apache has been correctly configured
+
+#Install and configure the Python mod_wsgi file
+1. Install the mod_wsgi package using `$ sudo apt-get install libapache2-mod-wsgi python-dev`
+2. Enable mod_wsgi using `$ sudo a2enmod wsgi`
+3. Restart Apache using `$ sudo service apache2 restart`
+4. To check if Python is installed, use `$ python`
+5. Exit with exit()
+
+### Install PostgreSQL
+1. While logged in as `grader`, install PostgreSQL `$ sudo apt-get install postgresql`
+2. PostgreSQL should not allow remote connections. Open the configuration file for postgreSQL `$ sudo nano /etc/postgresql/9.5/main/pg_hba.conf`.
+3. You should see:
+```
+local   all             postgres                                peer
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5
+```
+### Configure a new PostgreSQL user, catalog
+1. Switch to the `postgres` user `$ sudo su - postgres`
+2. Open PostgreSQL terminal with `$ psql`
+3. Create the catalog user with a password 'catalog'
+```
+# CREATE ROLE catalog WITH LOGIN PASSWORD 'catalog';
+# ALTER ROLE catalog CREATEDB;
+```
+4. Create database with owner `catalog`:
+```
+# CREATE DATABASE catalog WITH OWNER catalog;
+```
+5. Connect to the catalog database `# \c catalog`
+6. Revoke all the rights using `# REVOKE ALL ON SCHEMA public FROM public;`
+7. Grant access to user catalog using `# GRANT ALL ON SCHEMA public TO catalog;`
+8. List the existing roles `# \du`. The output should be like this:
+```
+List of roles
+Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+catalog   | Create DB                                                  | {}
+postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+```
+9. If not, run `# ALTER USER catalog LOGIN;`
+10. Exit from psql using `# \q`
+11. Exit from user postgres using `exit`
+
+### Create a new Linux user 'catalog'
+1. Create a new Linux user called `catalog` using `$ sudo adduser catalog`
+2. Give user catalog sudo access `$ sudo visudo`
+3. Search for the lines that looks like this:
+```
+root    ALL=(ALL:ALL) ALL
+grader  ALL=(ALL:ALL) ALL
+```
+4. Below this line, give sudo privileges to catalog:
+```
+root    ALL=(ALL:ALL) ALL
+grader  ALL=(ALL:ALL) ALL
+catalog  ALL=(ALL:ALL) ALL
+```
+5. Save and exit the file
+6. Log in as user catalog using `$ sudo su - catalog`
+7. Exit from user catalog using `exit`
