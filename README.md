@@ -6,6 +6,8 @@ The following steps walk through how to secure and setup a Linux distribution on
 
 To access the deployed website, visit http://54.255.238.98 or http://ec2-54-255-238-98.ap-southeast-1.compute.amazonaws.com, on port 2200.
 
+---
+
 ## Amazon Lightsail Server Set Up
 
 
@@ -22,6 +24,8 @@ The instance will take a few moments for setup. Once it is ready, do take note o
 
 * Here, download your private key, which is a `.pem` file
 
+---
+
 ## SSH into your server instance
 
 Within the instance you just created, you can connect to it by clicking "Connect using SSH". Alternatively, take the following steps to connect via your own SSH client:
@@ -29,6 +33,8 @@ Within the instance you just created, you can connect to it by clicking "Connect
 1. Move the downloaded `LightsailDefaultKey-ap-southeast-1.pem` public key file into the local folder ~/.ssh and rename it lightsail.pem
 2. In your terminal, type: `chmod 600 ~/.ssh/lightsail.pem` . This secures the public key while also making it accessible.
 3. To connect to the instance via the terminal: `$ ssh -i ~/.ssh/lightsail.pem ubuntu@54.255.238.98`, where `54.255.238.98` is the public IP address of the instance.
+
+---
 
 ## Server configuration
 
@@ -115,6 +121,8 @@ This prevents attackers from attempting with root:
 * `$ sudo nano /etc/ssh/sshd_config`
 * Find the `PermitRootLogin` line and edit to `no`
 * Restart ssh `$ sudo service ssh restart`
+
+---
 
 ## Deploying the Catalog application
 
@@ -276,6 +284,7 @@ $ python sportsgen.py
 
 The application should be live at http://54.255.238.98. If there are internal errors returned, check the Apache error logs by running `$ sudo tail -100 /var/log/apache2/error.log` and resolve the traceback call error(s) it displays.
 
+---
 
 ## Folder structure
 After these operations, the folder structure should look like:
@@ -300,6 +309,8 @@ After these operations, the folder structure should look like:
               |__ sport.html
          |-- /venv3          # Virtual Environment
 ```
+
+---
 
 ## Resources
 * Much gratitude to:
