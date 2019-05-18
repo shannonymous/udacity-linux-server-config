@@ -65,15 +65,30 @@ Configure the Uncomplicated Firewall (UFW)
 3. Allow all outgoings using `$ sudo ufw default allow outgoing`
 4. Allow incoming TCP packets on port 2200 to allow SSH `$ sudo ufw allow 2200/tcp`
 5. Allow incoming TCP packets on port 80 to allow www using `$ sudo ufw allow www`
-Allow incoming UDP packets on port 123 to allow NTP using `$ sudo ufw allow 123/udp`
-Close access through port 22 `$ sudo ufw deny 22`
-Enable firewall using `$ sudo ufw enable`
-Check the current firewall status using `$ sudo ufw status`
-Update the firewall configuration in your Amazon Lightsail instance by going to the Networking tab.
-Delete default SSH port 22 and add ports 123 (UDP) and 2200(TCP) in the 'Networking' tab on Lightsail. Your settings should look like the following:
+6. Allow incoming UDP packets on port 123 to allow NTP using `$ sudo ufw allow 123/udp`
+7. Close access through port 22 `$ sudo ufw deny 22`
+8. Enable firewall using `$ sudo ufw enable`
+9. Check the current firewall status using `$ sudo ufw status`. The output should look like this:
+`Status: active
+
+To                         Action      From
+--                         ------      ----
+2200/tcp                   ALLOW       Anywhere                  
+80/tcp                     ALLOW       Anywhere                  
+123/udp                    ALLOW       Anywhere                  
+22                         DENY        Anywhere                  
+2200/tcp (v6)              ALLOW       Anywhere (v6)             
+80/tcp (v6)                ALLOW       Anywhere (v6)             
+123/udp (v6)               ALLOW       Anywhere (v6)             
+22 (v6)                    DENY        Anywhere (v6)`
+
+10. Update the firewall configuration in your Amazon Lightsail instance by going to the Networking tab.
+11. Delete default SSH port 22 and add ports 123 (UDP) and 2200(TCP) in the 'Networking' tab on Lightsail. Your settings should look like the following:
 `HTTP      TCP     80
 Custom    UDP     123
 Custom    TCP     2200`
+12. Exit the SSH connection: `$ exit`
+
 
 
 
