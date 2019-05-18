@@ -9,12 +9,12 @@ To access the deployed website, visit http://54.255.238.98 or http://ec2-54-255-
 ## Amazon Lightsail Server Set Up
 
 
-* If you already have an account with Amazon Lightsail, login. Otherwise, create an Amazon Lightsail account.
-* After logging in, click 'Create an Instance'
-* Select Linux/Unix platform
-* For blueprint, select OS Only and Ubuntu
+* If you already have an account with Amazon Lightsail, login. Otherwise, create an [Amazon Lightsail account](https://lightsail.aws.amazon.com/ls/webapp/home/resources).
+* After logging in, click 'Create an Instance'.
+* Select `Linux/Unix` platform
+* For blueprint, select `OS Only` and `Ubuntu 16.04 LTS`
 * Select an instance plan (for this project, the most afforable plan will do)
-* Scroll down to name your instance and click 'Create'
+* Scroll down to name your instance and click `Create`
 
 The instance will take a few moments for setup. Once it is ready, do take note of the public IP of your instance.
 
@@ -23,7 +23,6 @@ The instance will take a few moments for setup. Once it is ready, do take note o
 * Here, download your private key, which is a `.pem` file
 
 ## SSH into your server instance
-
 
 Within the instance you just created, you can connect to it by clicking "Connect using SSH". Alternatively, take the following steps to connect via your own SSH client:
 
@@ -276,3 +275,33 @@ $ python sportsgen.py
 3. Restart Apache using `$ sudo service apache2 reload`
 
 The application should be live at http://54.255.238.98. If there are internal errors returned, check the Apache error logs by running `$ sudo tail -100 /var/log/apache2/error.log` and resolve the traceback call error(s) it displays.
+
+
+## Folder structure
+After these operations, the folder structure should look like:
+```
+/var/www/catalog
+    |-- catalog.wsgi
+    |__ /catalog             # Our Application Module
+         |-- __init__.py
+         |-- database_setup.py
+         |-- sportsgen.py
+         |-- sportswithusers.db   
+         |-- /static
+              |-- css
+              |__ img
+         |-- /templates
+              |-- catalog.html
+              |-- editsportitem.html
+              |-- newitem.html
+              |-- sportitem.html
+              |-- deletesportitem.htmnl
+              |-- newcategory.html
+              |__ sport.html
+         |-- /venv3          # Virtual Environment
+```
+
+## Much gratitude to
+* GitHub Repositories
+   * https://github.com/boisalai/udacity-linux-server-configuration/blob/master/README.md
+   * https://github.com/juvers/Linux-Configuration
