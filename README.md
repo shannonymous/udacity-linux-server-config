@@ -38,28 +38,27 @@ Within the instance you just created, you can connect to it by clicking "Connect
 
 ## Server configuration
 
-### Create a grader user
+### Create a grader user account
 
 * Log in as root user `$ sudo su -`
 * Create another user 'grader' `$ sudo adduser grader`
 * Create a new file in the sudoers directory. `$ sudo nano /etc/sudoers.d/grader`. In this, give the grader super permissions `grader ALL=(ALL:ALL) ALL`.
 * To prevent the "sudo: unable to resolve host(none)" error, edit the hosts file `$ sudo nano /etc/hosts`. Under 127.0.0.1:localhost, add `127.0.0.1 YOUR-IP-ADDRESS`.
 
-
-
+### Update packages
 Run the following commands to update all packages and set for future updates:
 
 * `$ sudo apt-get update`
 * `$ sudo apt-get upgrade`
 * `$ sudo apt-get dist-upgrade`
 
-Change the SSH port to access your instance
+### Change the SSH port to access your instance
    * Open up the configuration file: `$ sudo nano /etc/ssh/sshd_config`
    * Look for port number (on line 5) and change this from `22` to `2200`
    * Save and exit using `CTRL+X`, confirm with `Y`
    * Restart SSH `$ sudo service ssh restart`
 
-Configure the Uncomplicated Firewall (UFW)
+### Configure the Uncomplicated Firewall (UFW)
 1. Check the current firewall status using `$ sudo ufw status`
 2. Deny all incoming requests using `$ sudo ufw default deny incoming`
 3. Allow all outgoings using `$ sudo ufw default allow outgoing`
@@ -93,9 +92,7 @@ Custom    TCP     2200
 ```
 12. Exit the SSH connection: `$ exit`
 
-
-
-
+### Create SSH login for grader user
 Open a new(second) Terminal window (Command+N) to generate a public-private key pair.
 
 * Input `$ ssh-keygen -f ~/.ssh/grader.rsa`
@@ -112,3 +109,13 @@ Return to your original (first) terminal window logged into Amazon Lightsail as 
 * Change the ownership and permissions of the .ssh folder to the grader user: `$ chown -R grader.grader /home/grader/.ssh`.
 * Secure your authorized_keys `$ sudo chmod 700 /home/grader/.ssh` and `$ sudo chmod 644 /home/grader/.ssh/authorized_keys`.
 * Restart the SSH service `$ sudo service ssh restart`
+* You should now be able to login as grader user with port 2200 and the generated key pair with the following command: `$ ssh -i ~/.ssh/grader.rsa -p 2200 grader@54.255.238.98`.
+* You will be asked for grader's password. To disable it, `$ sudo nano /etc/ssh/sshd_config`. Find the line `PasswordAuthentication` and change text to no. After this, restart ssh again: `$ sudo service ssh restart`
+
+
+
+
+
+### Configure the timezone to UTC
+1. Run `$ sudo dpkg-reconfigure tzdata`
+2. Select `None of the above` to change the timezone to UTC.
